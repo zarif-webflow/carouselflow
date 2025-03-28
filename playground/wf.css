@@ -1,0 +1,7 @@
+.newsworthy-carousel-item {
+  flex: 0 0 calc(33.33% + var(--newsworthy-carousel-gap));
+}
+
+.newsworthy-carousel-item:last-child {
+  margin-right: 0;
+}

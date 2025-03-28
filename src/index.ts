@@ -18,14 +18,16 @@ const init = () => {
     const loop = emblaNode.dataset.loop === 'true';
     const autoPlay = emblaNode.dataset.autoPlay === 'true';
 
-    const emblaContainer = document.querySelector<HTMLElement>('[data-carousel-container]');
+    const emblaContainer = emblaNode.querySelector<HTMLElement>('[data-carousel-container]');
 
     if (!emblaContainer) {
       console.error("[data-carousel-container] wasn't found!");
       return;
     }
 
-    const emblaSlides = Array.from(document.querySelectorAll<HTMLElement>('[data-carousel-slide]'));
+    const emblaSlides = Array.from(
+      emblaContainer.querySelectorAll<HTMLElement>('[data-carousel-slide]')
+    );
 
     if (emblaSlides.length === 0) {
       console.error("[data-carousel-slider] wasn't found!");
