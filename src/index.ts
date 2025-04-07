@@ -80,6 +80,26 @@ const applyEmblaCarousel = <T extends HTMLElement>(emblaNode: T) => {
   if (nextButton && prevButton) {
     nextButton.addEventListener('click', () => emblaApi.scrollNext(), false);
     prevButton.addEventListener('click', () => emblaApi.scrollPrev(), false);
+
+    const adjustButtons = () => {
+      if (!emblaApi.canScrollNext()) {
+        nextButton.classList.add('is-disable');
+      } else {
+        nextButton.classList.remove('is-disable');
+      }
+
+      if (!emblaApi.canScrollPrev()) {
+        prevButton.classList.add('is-disable');
+      } else {
+        prevButton.classList.remove('is-disable');
+      }
+    };
+
+    adjustButtons();
+
+    emblaApi.on('select', () => {
+      adjustButtons();
+    });
   }
 };
 
