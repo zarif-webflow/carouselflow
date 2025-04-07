@@ -95,7 +95,9 @@ const applyEmblaCarousel = <T extends HTMLElement>(emblaNode: T) => {
       }
     };
 
-    adjustButtons();
+    emblaApi.on('reInit', () => {
+      adjustButtons();
+    });
 
     emblaApi.on('select', () => {
       adjustButtons();
