@@ -30,7 +30,7 @@ const init = () => {
     );
 
     if (emblaSlides.length === 0) {
-      console.error("[data-carousel-slider] wasn't found!");
+      console.error("[data-carousel-slide] wasn't found!");
       return;
     }
 
@@ -39,6 +39,7 @@ const init = () => {
       dragFree,
       container: emblaContainer,
       slides: emblaSlides,
+      align: 'start',
     };
 
     const plugins: EmblaPluginType[] = [];

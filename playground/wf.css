@@ -5,3 +5,17 @@
 .newsworthy-carousel-item:last-child {
   margin-right: 0;
 }
+
+.verticles-item:hover .vertical-line {
+  background-color: var(--primary-orange);
+}
+
+.verticles-item:first-child .vertical-line {
+  background-color: var(--primary-orange);
+}
+
+/* font-size: 2.5rem;
+font-size: 2.5rem clamp(2.5rem, 2rem + 2.5vw, 4rem); */
+
+/* font-size: 2rem;
+font-size: clamp(2rem, 1.6666666666666667rem + 1.6666666666666667vw, 3rem); */
