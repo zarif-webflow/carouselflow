@@ -3,30 +3,37 @@ import type { EmblaOptionsType } from 'embla-carousel';
 import EmblaCarousel from 'embla-carousel';
 import Autoplay from 'embla-carousel-autoplay';
 
-import type { CMSFilters } from './types/CMSFilters';
+import { detectChildrenReplacement } from './utils/detect-children-replacement';
 
+const emblaParentSelector = '[data-carousel-parent]';
+const emblaContainerSelector = '[data-carousel-container]';
+const emblaSlideSelector = '[data-carousel-slide]';
 const activeEmblaNodesSet: Set<HTMLElement> = new Set();
 
-const isFinsweetCmsList = <T extends HTMLElement>(element: T): boolean => {
+const isFinsweetCmsList = <T extends HTMLElement>(element: T) => {
   const targetElement =
     element.closest<HTMLElement>(
-      '[fs-cmsfilter-element],[fs-cmsload-elemen],[fs-cmssort-element]'
+      '[fs-cmsfilter-element],[fs-cmsload-element],[fs-cmssort-element]'
     ) ||
     element.querySelector<HTMLElement>(
-      '[fs-cmsfilter-element],[fs-cmsload-elemen],[fs-cmssort-element]'
+      '[fs-cmsfilter-element],[fs-cmsload-element],[fs-cmssort-element]'
     );
 
   if (!targetElement) return false;
 
-  return [
+  const isFinsweetCms = [
     targetElement.getAttribute('fs-cmsfilter-element'),
     targetElement.getAttribute('fs-cmsload-element'),
     targetElement.getAttribute('fs-cmssort-element'),
   ].some((val) => val && val.includes('list'));
+
+  if (isFinsweetCms) return targetElement;
+
+  return null;
 };
 
 const getEmblaNodes = <T extends HTMLElement>(parent?: T) =>
-  Array.from((parent || document).querySelectorAll<HTMLElement>('[data-carousel-parent]'));
+  Array.from((parent || document).querySelectorAll<HTMLElement>(emblaParentSelector));
 
 const applyEmblaCarousel = <T extends HTMLElement>(emblaNode: T) => {
   if (activeEmblaNodesSet.has(emblaNode)) return;
@@ -35,19 +42,17 @@ const applyEmblaCarousel = <T extends HTMLElement>(emblaNode: T) => {
   const loop = emblaNode.dataset.loop === 'true';
   const autoPlay = emblaNode.dataset.autoPlay === 'true';
 
-  const emblaContainer = emblaNode.querySelector<HTMLElement>('[data-carousel-container]');
+  const emblaContainer = emblaNode.querySelector<HTMLElement>(emblaContainerSelector);
 
   if (!emblaContainer) {
-    console.error("[data-carousel-container] wasn't found!");
+    console.error(`${emblaContainerSelector} wasn't found!`);
     return;
   }
 
-  const emblaSlides = Array.from(
-    emblaContainer.querySelectorAll<HTMLElement>('[data-carousel-slide]')
-  );
+  const emblaSlides = Array.from(emblaContainer.querySelectorAll<HTMLElement>(emblaSlideSelector));
 
   if (emblaSlides.length === 0) {
-    console.error("[data-carousel-slide] wasn't found!");
+    console.error(`${emblaSlideSelector} wasn't found!`);
     return;
   }
 
@@ -114,34 +119,19 @@ const doFirstInit = () => {
   }
 
   for (const emblaNode of emblaNodes) {
-    if (isFinsweetCmsList(emblaNode)) continue;
-    applyEmblaCarousel(emblaNode);
-    activeEmblaNodesSet.add(emblaNode);
-  }
-};
+    const finsweetCmsList = isFinsweetCmsList(emblaNode);
 
-doFirstInit();
-
-/**
- *  Check for finsweet cms carousels
- */
-window.fsAttributes = window.fsAttributes || [];
-window.fsAttributes.push([
-  'cmsfilter',
-  (cmsFltInstances: CMSFilters[]) => {
-    for (const cmsFlt of cmsFltInstances) {
-      cmsFlt.listInstance.on('renderitems', () => {
-        const cmsWrapper = cmsFlt.listInstance.list;
-
-        if (!cmsWrapper) return;
-
-        const emblaNodes = getEmblaNodes(cmsWrapper);
-
+    if (finsweetCmsList) {
+      detectChildrenReplacement(finsweetCmsList, emblaParentSelector, (emblaNodes) => {
         for (const emblaNode of emblaNodes) {
           applyEmblaCarousel(emblaNode);
           activeEmblaNodesSet.add(emblaNode);
         }
       });
     }
-  },
-]);
+    applyEmblaCarousel(emblaNode);
+    activeEmblaNodesSet.add(emblaNode);
+  }
+};
+
+doFirstInit();
