@@ -1,8 +1,22 @@
+const detectChildrenReplacementCache: Map<HTMLElement, Set<string>> = new Map();
+
 export const detectChildrenReplacement = (
   parentDiv: HTMLElement,
   childSelector: string,
   callback: (currentChildrens: HTMLElement[]) => void
 ) => {
+  const cachedElSet = detectChildrenReplacementCache.get(parentDiv);
+
+  if (cachedElSet && cachedElSet.has(childSelector)) {
+    return;
+  }
+
+  if (cachedElSet) {
+    cachedElSet.add(childSelector);
+  } else {
+    detectChildrenReplacementCache.set(parentDiv, new Set([childSelector]));
+  }
+
   // Keep track of the previous matching children
   let previousChildrens = Array.from(parentDiv.querySelectorAll(childSelector));
 

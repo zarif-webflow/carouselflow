@@ -83,8 +83,20 @@ const applyEmblaCarousel = <T extends HTMLElement>(emblaNode: T) => {
   const prevButton = emblaNode.querySelector<HTMLElement>('[data-carousel-prev]');
 
   if (nextButton && prevButton) {
-    nextButton.addEventListener('click', () => emblaApi.scrollNext(), false);
-    prevButton.addEventListener('click', () => emblaApi.scrollPrev(), false);
+    nextButton.addEventListener(
+      'click',
+      () => {
+        if (emblaApi.canScrollNext()) emblaApi.scrollNext();
+      },
+      false
+    );
+    prevButton.addEventListener(
+      'click',
+      () => {
+        if (emblaApi.canScrollPrev()) emblaApi.scrollPrev();
+      },
+      false
+    );
 
     const adjustButtons = () => {
       if (!emblaApi.canScrollNext()) {

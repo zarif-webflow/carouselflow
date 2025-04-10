@@ -1825,7 +1825,17 @@
   Autoplay.globalOptions = void 0;
 
   // src/utils/detect-children-replacement.ts
+  var detectChildrenReplacementCache = /* @__PURE__ */ new Map();
   var detectChildrenReplacement = (parentDiv, childSelector, callback) => {
+    const cachedElSet = detectChildrenReplacementCache.get(parentDiv);
+    if (cachedElSet && cachedElSet.has(childSelector)) {
+      return;
+    }
+    if (cachedElSet) {
+      cachedElSet.add(childSelector);
+    } else {
+      detectChildrenReplacementCache.set(parentDiv, /* @__PURE__ */ new Set([childSelector]));
+    }
     let previousChildrens = Array.from(parentDiv.querySelectorAll(childSelector));
     const observer = new MutationObserver((mutations) => {
       const hasChildListChanges = mutations.some((mutation) => mutation.type === "childList");
@@ -1905,8 +1915,20 @@
     const nextButton = emblaNode.querySelector("[data-carousel-next]");
     const prevButton = emblaNode.querySelector("[data-carousel-prev]");
     if (nextButton && prevButton) {
-      nextButton.addEventListener("click", () => emblaApi.scrollNext(), false);
-      prevButton.addEventListener("click", () => emblaApi.scrollPrev(), false);
+      nextButton.addEventListener(
+        "click",
+        () => {
+          if (emblaApi.canScrollNext()) emblaApi.scrollNext();
+        },
+        false
+      );
+      prevButton.addEventListener(
+        "click",
+        () => {
+          if (emblaApi.canScrollPrev()) emblaApi.scrollPrev();
+        },
+        false
+      );
       const adjustButtons = () => {
         if (!emblaApi.canScrollNext()) {
           nextButton.classList.add("is-disable");
