@@ -99,6 +99,9 @@ const applyEmblaCarousel = <T extends HTMLElement>(emblaNode: T) => {
         prevButton.classList.remove('is-disable');
       }
     };
+    emblaApi.on('init', () => {
+      adjustButtons();
+    });
 
     emblaApi.on('reInit', () => {
       adjustButtons();
