@@ -14,6 +14,9 @@ type EmblaNodeEventMap = {
 
 // Extended element type for embla nodes
 export interface EmblaNodeElement extends HTMLElement {
+  // Store the Embla API instance directly on the element
+  emblaApi?: EmblaCarouselType;
+
   // Include all embla custom events
   addEventListener<K extends keyof EmblaNodeEventMap>(
     type: K,

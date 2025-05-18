@@ -94,6 +94,10 @@ const applyEmblaCarousel = <T extends HTMLElement>(emblaNode: T) => {
 
   const emblaApi = EmblaCarousel(emblaNode, options, plugins);
 
+  // Attach the API instance to the element for external access
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (emblaNode as any).emblaApi = emblaApi;
+
   // Add this code to forward embla events to the emblaNode element
   if (targetExposedEvents.length > 0) {
     targetExposedEvents.forEach((eventName) => {
