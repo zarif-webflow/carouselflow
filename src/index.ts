@@ -1,8 +1,11 @@
 import type { EmblaPluginType } from 'embla-carousel';
 import type { EmblaOptionsType } from 'embla-carousel';
+import type { EmblaCarouselType } from 'embla-carousel';
+import type { EmblaEventType } from 'embla-carousel';
 import EmblaCarousel from 'embla-carousel';
 import Autoplay from 'embla-carousel-autoplay';
 
+import { emblaEventListenersSet } from './constants';
 import { detectChildrenReplacement } from './utils/detect-children-replacement';
 
 const emblaParentSelector = '[data-carousel-parent]';
@@ -41,6 +44,8 @@ const applyEmblaCarousel = <T extends HTMLElement>(emblaNode: T) => {
   const dragFree = emblaNode.dataset.dragFree === 'true';
   const loop = emblaNode.dataset.loop === 'true';
   const autoPlay = emblaNode.dataset.autoPlay === 'true';
+  const align = (emblaNode.dataset.emblaAlign || 'start') as 'start' | 'center' | 'end';
+  const startIndex = Number.parseInt(emblaNode.dataset.emblaStartIndex || '0', 10);
 
   const emblaContainer = emblaNode.querySelector<HTMLElement>(emblaContainerSelector);
 
@@ -56,12 +61,22 @@ const applyEmblaCarousel = <T extends HTMLElement>(emblaNode: T) => {
     return;
   }
 
+  const exposedEventsValue = emblaNode.dataset.emblaExposedEvents;
+  const targetExposedEvents = (
+    exposedEventsValue
+      ? exposedEventsValue
+          .split(',')
+          .filter((val) => emblaEventListenersSet.has(val as EmblaEventType))
+      : []
+  ) as EmblaEventType[];
+
   const options: EmblaOptionsType = {
     loop,
     dragFree,
     container: emblaContainer,
     slides: emblaSlides,
-    align: 'start',
+    align: align,
+    startIndex,
   };
 
   const plugins: EmblaPluginType[] = [];
@@ -78,6 +93,21 @@ const applyEmblaCarousel = <T extends HTMLElement>(emblaNode: T) => {
   }
 
   const emblaApi = EmblaCarousel(emblaNode, options, plugins);
+
+  // Add this code to forward embla events to the emblaNode element
+  if (targetExposedEvents.length > 0) {
+    targetExposedEvents.forEach((eventName) => {
+      emblaApi.on(eventName, (embla: EmblaCarouselType) => {
+        // Create a custom event with the embla instance in the detail
+        const customEvent = new CustomEvent(`embla:${eventName}`, {
+          detail: { embla },
+        });
+
+        // Dispatch the event on the emblaNode element
+        emblaNode.dispatchEvent(customEvent);
+      });
+    });
+  }
 
   const nextButton = emblaNode.querySelector<HTMLElement>('[data-carousel-next]');
   const prevButton = emblaNode.querySelector<HTMLElement>('[data-carousel-prev]');
@@ -129,7 +159,7 @@ const doFirstInit = () => {
   const emblaNodes = getEmblaNodes();
 
   if (emblaNodes.length === 0) {
-    console.log('[data-carousel-parent] count is 0');
+    console.debug('[data-carousel-parent] count is 0');
     return;
   }
 
