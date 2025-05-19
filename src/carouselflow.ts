@@ -117,21 +117,57 @@ const applyEmblaCarousel = <T extends HTMLElement>(emblaNode: T) => {
   const prevButton = emblaNode.querySelector<HTMLElement>('[data-carousel-prev]');
 
   if (nextButton && prevButton) {
+    // Prevent all relevant events from propagating to parent elements on both buttons
+    const swipeEvents = [
+      'mousedown',
+      'mousemove',
+      'mouseup',
+      'touchstart',
+      'touchmove',
+      'touchend',
+    ];
+
+    // Apply to next button
+    swipeEvents.forEach((eventType) => {
+      nextButton.addEventListener(
+        eventType,
+        (event) => {
+          event.stopPropagation();
+        },
+        { passive: eventType === 'touchmove' || eventType === 'mousemove' }
+      );
+    });
+
+    // Apply to prev button
+    swipeEvents.forEach((eventType) => {
+      prevButton.addEventListener(
+        eventType,
+        (event) => {
+          event.stopPropagation();
+        },
+        { passive: eventType === 'touchmove' || eventType === 'mousemove' }
+      );
+    });
+
+    // Existing click handlers
     nextButton.addEventListener(
       'click',
-      () => {
+      (event) => {
+        event.stopPropagation(); // Stop event propagation to parent elements
         if (emblaApi.canScrollNext()) emblaApi.scrollNext();
       },
       false
     );
     prevButton.addEventListener(
       'click',
-      () => {
+      (event) => {
+        event.stopPropagation(); // Stop event propagation to parent elements
         if (emblaApi.canScrollPrev()) emblaApi.scrollPrev();
       },
       false
     );
 
+    // Existing button adjustment code
     const adjustButtons = () => {
       if (!emblaApi.canScrollNext()) {
         nextButton.classList.add('is-disable');
