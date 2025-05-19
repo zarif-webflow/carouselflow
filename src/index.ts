@@ -44,7 +44,7 @@ const applyEmblaCarousel = <T extends HTMLElement>(emblaNode: T) => {
   const dragFree = emblaNode.dataset.dragFree === 'true';
   const loop = emblaNode.dataset.loop === 'true';
   const autoPlay = emblaNode.dataset.autoPlay === 'true';
-  const align = (emblaNode.dataset.emblaAlign || 'start') as 'start' | 'center' | 'end';
+  const align = (emblaNode.dataset.emblaAlign || 'center') as 'start' | 'center' | 'end';
   const startIndex = Number.parseInt(emblaNode.dataset.emblaStartIndex || '0', 10);
 
   const emblaContainer = emblaNode.querySelector<HTMLElement>(emblaContainerSelector);
