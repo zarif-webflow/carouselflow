@@ -46,7 +46,7 @@ const applyEmblaCarousel = <T extends HTMLElement>(emblaNode: T) => {
   const autoPlay = emblaNode.dataset.autoPlay === 'true';
   const align = (emblaNode.dataset.emblaAlign || 'center') as 'start' | 'center' | 'end';
   const startIndex = Number.parseInt(emblaNode.dataset.emblaStartIndex || '0', 10);
-
+  const lastSlideCenter = emblaNode.dataset.emblaLastSlideCenter;
   const emblaContainer = emblaNode.querySelector<HTMLElement>(emblaContainerSelector);
 
   if (!emblaContainer) {
@@ -77,6 +77,7 @@ const applyEmblaCarousel = <T extends HTMLElement>(emblaNode: T) => {
     slides: emblaSlides,
     align: align,
     startIndex,
+    containScroll: lastSlideCenter === 'false' ? undefined : false,
   };
 
   const plugins: EmblaPluginType[] = [];
