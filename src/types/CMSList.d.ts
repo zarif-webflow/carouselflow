@@ -164,7 +164,7 @@ export interface CMSList {
    *
    * Defaults to `push`.
    */
-  addItems(itemElements: HTMLElement[], method?: 'unshift' | 'push'): Promise<void>;
+  addItems(itemElements: HTMLElement[], method?: "unshift" | "push"): Promise<void>;
 
   /**
    * Adds a static item to the Collection Instance.
@@ -211,13 +211,13 @@ export interface CMSList {
    */
   displayElement(
     elementKey:
-      | 'wrapper'
-      | 'list'
-      | 'emptyElement'
-      | 'initialElement'
-      | 'paginationNext'
-      | 'paginationPrevious'
-      | 'loader',
+      | "wrapper"
+      | "list"
+      | "emptyElement"
+      | "initialElement"
+      | "paginationNext"
+      | "paginationPrevious"
+      | "loader",
     show?: boolean,
     animate?: boolean
   ): Promise<void>;
@@ -283,7 +283,7 @@ export interface CMSList {
    */
   getInstanceIndex(key: string): number | undefined;
 
-  on(event: 'renderitems', callback: (cmsItems: CMSItem) => void): void;
+  on(event: "renderitems", callback: (cmsItems: CMSItem) => void): void;
 }
 
 export interface CMSItem {

@@ -1,5 +1,5 @@
-import type { CMSFilters } from './CMSFilters';
-import type { CMSList } from './CMSList';
+import type { CMSFilters } from "./CMSFilters";
+import type { CMSList } from "./CMSList";
 
 /**
  * Window object.
@@ -13,10 +13,10 @@ declare global {
 
 type FsAttributesCallback =
   | [
-      'cmsload' | 'cmsnest' | 'cmscombine' | 'cmsprevnext' | 'cmsslider' | 'cmssort' | 'cmstabs',
+      "cmsload" | "cmsnest" | "cmscombine" | "cmsprevnext" | "cmsslider" | "cmssort" | "cmstabs",
       (value: CMSList[]) => void,
     ]
-  | ['cmsfilter', (value: CMSFilters[]) => void];
+  | ["cmsfilter", (value: CMSFilters[]) => void];
 
 type FsAttributesBase = {
   push: (...args: FsAttributesCallback[]) => void;

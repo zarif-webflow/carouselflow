@@ -23,7 +23,7 @@ export const detectChildrenReplacement = (
   // Create a MutationObserver instance
   const observer = new MutationObserver((mutations) => {
     // Check if any mutations involve childList changes
-    const hasChildListChanges = mutations.some((mutation) => mutation.type === 'childList');
+    const hasChildListChanges = mutations.some((mutation) => mutation.type === "childList");
 
     if (hasChildListChanges) {
       // Get the current matching children

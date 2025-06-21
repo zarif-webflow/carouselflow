@@ -1,4 +1,4 @@
-import type { CMSList } from './CMSList';
+import type { CMSList } from "./CMSList";
 
 export interface CMSFilters {
   /**
@@ -119,12 +119,12 @@ interface FilterData {
   /**
    * The matching rule.
    */
-  match?: 'any' | 'all';
+  match?: "any" | "all";
 
   /**
    * A specific filtering mode.
    */
-  mode?: 'range';
+  mode?: "range";
 
   /**
    * Defines if matching `CMSItemProps` should be highlighted.
@@ -139,7 +139,7 @@ interface FilterData {
   /**
    * Defines an override for the tag format of the filter.
    */
-  tagFormat?: 'category';
+  tagFormat?: "category";
 
   /**
    * Defines an override for the identifier display in the `category` tag format.
@@ -189,7 +189,7 @@ interface FilterElement {
   /**
    * Defines a filtering mode for the element's properties.
    */
-  mode?: 'from' | 'to';
+  mode?: "from" | "to";
 
   /**
    * Defines the Active CSS Class to add when the element is active.

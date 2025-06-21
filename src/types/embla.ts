@@ -1,4 +1,4 @@
-import type { EmblaCarouselType, EmblaEventType } from 'embla-carousel';
+import type { EmblaCarouselType, EmblaEventType } from "embla-carousel";
 
 // Event type for Embla custom events
 interface EmblaCustomEvent extends CustomEvent {
@@ -38,7 +38,7 @@ export interface EmblaNodeElement extends HTMLElement {
     dragFree?: string;
     loop?: string;
     autoPlay?: string;
-    emblaAlign?: 'start' | 'center' | 'end';
+    emblaAlign?: "start" | "center" | "end";
     emblaStartIndex?: string;
     emblaExposedEvents?: string;
     [key: string]: string | undefined;
