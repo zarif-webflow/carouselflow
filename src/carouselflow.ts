@@ -8,34 +8,11 @@ import EmblaCarousel from "embla-carousel";
 import Autoplay from "embla-carousel-autoplay";
 
 import { emblaEventListenersSet } from "./constants";
-import { detectChildrenReplacement } from "./utils/detect-children-replacement";
 
 const emblaParentSelector = "[data-carousel-parent]";
 const emblaContainerSelector = "[data-carousel-container]";
 const emblaSlideSelector = "[data-carousel-slide]";
 const activeEmblaNodesSet: Set<HTMLElement> = new Set();
-
-const isFinsweetCmsList = <T extends HTMLElement>(element: T) => {
-  const targetElement =
-    element.closest<HTMLElement>(
-      "[fs-cmsfilter-element],[fs-cmsload-element],[fs-cmssort-element]"
-    ) ||
-    element.querySelector<HTMLElement>(
-      "[fs-cmsfilter-element],[fs-cmsload-element],[fs-cmssort-element]"
-    );
-
-  if (!targetElement) return false;
-
-  const isFinsweetCms = [
-    targetElement.getAttribute("fs-cmsfilter-element"),
-    targetElement.getAttribute("fs-cmsload-element"),
-    targetElement.getAttribute("fs-cmssort-element"),
-  ].some((val) => val && val.includes("list"));
-
-  if (isFinsweetCms) return targetElement;
-
-  return null;
-};
 
 const getEmblaNodes = <T extends HTMLElement>(parent?: T) =>
   Array.from((parent || document).querySelectorAll<HTMLElement>(emblaParentSelector));
@@ -207,16 +184,6 @@ const doFirstInit = () => {
   }
 
   for (const emblaNode of emblaNodes) {
-    const finsweetCmsList = isFinsweetCmsList(emblaNode);
-
-    if (finsweetCmsList) {
-      detectChildrenReplacement(finsweetCmsList, emblaParentSelector, (emblaNodes) => {
-        for (const emblaNode of emblaNodes) {
-          applyEmblaCarousel(emblaNode);
-          activeEmblaNodesSet.add(emblaNode);
-        }
-      });
-    }
     applyEmblaCarousel(emblaNode);
     activeEmblaNodesSet.add(emblaNode);
   }
