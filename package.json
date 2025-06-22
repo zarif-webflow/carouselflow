@@ -42,7 +42,7 @@
   },
   "dependencies": {
     "@finsweet/ts-utils": "^0.40.0",
-    "@taj-wf/utils": "^1.1.4",
+    "@taj-wf/utils": "^1.2.0",
     "embla-carousel": "^8.6.0",
     "embla-carousel-autoplay": "^8.6.0"
   },

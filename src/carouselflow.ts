@@ -1,3 +1,9 @@
+import {
+  addWFCustomPageLoadFeature,
+  afterWebflowReady,
+  getHtmlElement,
+  getMultipleHtmlElements,
+} from "@taj-wf/utils";
 import type {
   EmblaCarouselType,
   EmblaEventType,
@@ -9,36 +15,42 @@ import Autoplay from "embla-carousel-autoplay";
 
 import { emblaEventListenersSet } from "./constants";
 
-const emblaParentSelector = "[data-carousel-parent]";
-const emblaContainerSelector = "[data-carousel-container]";
-const emblaSlideSelector = "[data-carousel-slide]";
-const activeEmblaNodesSet: Set<HTMLElement> = new Set();
+type CarouselInstance = {
+  emblaNode: HTMLElement;
+  api: EmblaCarouselType;
+  abortController: AbortController;
+};
+
+let carouselInstances: Array<CarouselInstance> = [];
+
+const SELECTORS = {
+  parent: "[data-carousel-parent]",
+  container: "[data-carousel-container]",
+  slide: "[data-carousel-slide]",
+  nextButton: "[data-carousel-next]",
+  prevButton: "[data-carousel-prev]",
+} as const;
 
 const getEmblaNodes = <T extends HTMLElement>(parent?: T) =>
-  Array.from((parent || document).querySelectorAll<HTMLElement>(emblaParentSelector));
+  getMultipleHtmlElements({ selector: SELECTORS.parent, parent });
 
 const applyEmblaCarousel = <T extends HTMLElement>(emblaNode: T) => {
-  if (activeEmblaNodesSet.has(emblaNode)) return;
-
   const dragFree = emblaNode.dataset.dragFree === "true";
   const loop = emblaNode.dataset.loop === "true";
   const autoPlay = emblaNode.dataset.autoPlay === "true";
   const align = (emblaNode.dataset.emblaAlign || "center") as "start" | "center" | "end";
   const startIndex = Number.parseInt(emblaNode.dataset.emblaStartIndex || "0", 10);
   const lastSlideCenter = emblaNode.dataset.emblaLastSlideCenter;
-  const emblaContainer = emblaNode.querySelector<HTMLElement>(emblaContainerSelector);
+  const emblaContainer = getHtmlElement({ selector: SELECTORS.container, parent: emblaNode });
 
-  if (!emblaContainer) {
-    console.error(`${emblaContainerSelector} wasn't found!`);
-    return;
-  }
+  if (!emblaContainer) return;
 
-  const emblaSlides = Array.from(emblaContainer.querySelectorAll<HTMLElement>(emblaSlideSelector));
+  const emblaSlides = getMultipleHtmlElements({
+    selector: SELECTORS.slide,
+    parent: emblaContainer,
+  });
 
-  if (emblaSlides.length === 0) {
-    console.error(`${emblaSlideSelector} wasn't found!`);
-    return;
-  }
+  if (!emblaSlides) return;
 
   const exposedEventsValue = emblaNode.dataset.emblaExposedEvents;
   const targetExposedEvents = (
@@ -74,6 +86,8 @@ const applyEmblaCarousel = <T extends HTMLElement>(emblaNode: T) => {
 
   const emblaApi = EmblaCarousel(emblaNode, options, plugins);
 
+  const abortController = new AbortController();
+
   // Attach the API instance to the element for external access
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (emblaNode as any).emblaApi = emblaApi;
@@ -93,8 +107,8 @@ const applyEmblaCarousel = <T extends HTMLElement>(emblaNode: T) => {
     });
   }
 
-  const nextButton = emblaNode.querySelector<HTMLElement>("[data-carousel-next]");
-  const prevButton = emblaNode.querySelector<HTMLElement>("[data-carousel-prev]");
+  const nextButton = getHtmlElement({ selector: SELECTORS.nextButton, parent: emblaNode });
+  const prevButton = getHtmlElement({ selector: SELECTORS.prevButton, parent: emblaNode });
 
   if (nextButton && prevButton) {
     // Prevent all relevant events from propagating to parent elements on both buttons
@@ -114,7 +128,10 @@ const applyEmblaCarousel = <T extends HTMLElement>(emblaNode: T) => {
         (event) => {
           event.stopPropagation();
         },
-        { passive: eventType === "touchmove" || eventType === "mousemove" }
+        {
+          passive: eventType === "touchmove" || eventType === "mousemove",
+          signal: abortController.signal,
+        }
       );
     });
 
@@ -125,7 +142,10 @@ const applyEmblaCarousel = <T extends HTMLElement>(emblaNode: T) => {
         (event) => {
           event.stopPropagation();
         },
-        { passive: eventType === "touchmove" || eventType === "mousemove" }
+        {
+          passive: eventType === "touchmove" || eventType === "mousemove",
+          signal: abortController.signal,
+        }
       );
     });
 
@@ -136,7 +156,7 @@ const applyEmblaCarousel = <T extends HTMLElement>(emblaNode: T) => {
         event.stopPropagation(); // Stop event propagation to parent elements
         if (emblaApi.canScrollNext()) emblaApi.scrollNext();
       },
-      false
+      { capture: false, signal: abortController.signal }
     );
     prevButton.addEventListener(
       "click",
@@ -144,7 +164,7 @@ const applyEmblaCarousel = <T extends HTMLElement>(emblaNode: T) => {
         event.stopPropagation(); // Stop event propagation to parent elements
         if (emblaApi.canScrollPrev()) emblaApi.scrollPrev();
       },
-      false
+      { capture: false, signal: abortController.signal }
     );
 
     // Existing button adjustment code
@@ -173,20 +193,47 @@ const applyEmblaCarousel = <T extends HTMLElement>(emblaNode: T) => {
       adjustButtons();
     });
   }
+
+  carouselInstances.push({ emblaNode, api: emblaApi, abortController });
 };
 
-const doFirstInit = () => {
+const initializeCarousels = () => {
   const emblaNodes = getEmblaNodes();
 
-  if (emblaNodes.length === 0) {
-    console.debug("[data-carousel-parent] count is 0");
-    return;
-  }
+  if (!emblaNodes) return;
 
   for (const emblaNode of emblaNodes) {
     applyEmblaCarousel(emblaNode);
-    activeEmblaNodesSet.add(emblaNode);
   }
 };
 
-doFirstInit();
+const destroyCarousels = () => {
+  for (const carouselInstance of carouselInstances) {
+    const { emblaNode, api, abortController } = carouselInstance;
+
+    // Destroy the Embla instance
+    api.destroy();
+
+    // Abort any ongoing operations
+    abortController.abort();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    delete (emblaNode as any).emblaApi;
+  }
+  carouselInstances = [];
+};
+
+afterWebflowReady(() => {
+  initializeCarousels();
+
+  addWFCustomPageLoadFeature({
+    name: "CAROUSELFLOW",
+    async: false,
+    init: initializeCarousels,
+    destroy: destroyCarousels,
+    reInit: () => {
+      destroyCarousels();
+      initializeCarousels();
+    },
+  });
+});
