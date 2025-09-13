@@ -68,7 +68,7 @@ const applyEmblaCarousel = <T extends HTMLElement>(emblaNode: T) => {
     slides: emblaSlides,
     align: align,
     startIndex,
-    containScroll: lastSlideCenter === "false" ? undefined : false,
+    ...(lastSlideCenter === "false" ? {} : { containScroll: false }),
   };
 
   const plugins: EmblaPluginType[] = [];
